@@ -1,0 +1,13 @@
+# Build artifacts and local-only state
+venv/
+.venv/
+tools/
+
+# Generated output
+Karaoke/
+karaoke-selftest/
+
+# Logs
+*.log
+setup log.txt
+_karaoke log.txt
