@@ -1,6 +1,9 @@
-# cmd.exe needs CRLF in .bat files, otherwise labels/goto misbehave.
-*.bat   text eol=crlf
+# cmd.exe needs real CRLF bytes in .bat files, and labels/goto break without
+# them. -text keeps the bytes exactly as committed (no LF normalisation), so a
+# raw download or a zip from GitHub still gives a working file.
+*.bat   -text
+
 *.ps1   text eol=crlf
 *.txt   text eol=crlf
 *.md    text eol=crlf
-.gitignore text eol=lf
+.gitignore  text eol=lf
