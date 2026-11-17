@@ -1,7 +1,7 @@
 # Karaoke Tracks
 
-Turn any song into an instrumental (karaoke) version on Windows, by removing
-the vocals with [Demucs](https://github.com/adefossez/demucs).
+Turn any song into an instrumental (karaoke) version by removing the vocals
+with [Demucs](https://github.com/adefossez/demucs).
 
 Double-click a file, drag a folder of songs onto it, and get a `Karaoke`
 folder next to your music containing 320 kbps MP3 instrumentals.
@@ -10,38 +10,60 @@ folder next to your music containing 320 kbps MP3 instrumentals.
 D:\Music\Album A\  Highway to AI.mp3        ->  Karaoke\Highway to AI (Instrumental).mp3
 ```
 
-## What is in here
+## Windows or macOS?
+
+| Platform | Where | Start with |
+| --- | --- | --- |
+| Windows 10/11 | repository root | `Setup Karaoke Tracks.bat`, then `Make Karaoke Tracks.bat` |
+| macOS 11+ | [`macos/`](macos/) | `Setup Karaoke Tracks.command`, then `Make Karaoke Tracks.command` |
+
+Both do the same job and share the same behaviour; only the shell differs
+(batch + PowerShell versus bash 3.2 and `.command` files). Each folder has
+its own `readme.txt` with the full instructions - start there.
+
+## What is in each folder
 
 | File | Purpose |
 | --- | --- |
-| `Make Karaoke Tracks.bat` | Everyday launcher. Loads the environment, then runs the script. |
-| `Make Karaoke Tracks.ps1` | The conversion script (Demucs, one fresh temp folder per track). |
-| `Setup Karaoke Tracks.bat` | One-time installer: Python, Demucs, PyTorch, ffmpeg. |
-| `Setup Karaoke Tracks.ps1` | The install logic. |
+| `Make Karaoke Tracks.*` | Everyday launcher. Loads the environment, then runs the script. |
+| `Setup Karaoke Tracks.*` | One-time installer: Python, Demucs, PyTorch, ffmpeg. |
 | `readme.txt` | **The full manual** - start here. |
+
+On Windows the launcher and script are separate files (`.bat` + `.ps1`); on
+macOS a single `.command` file does both.
 
 ## Quick start
 
-1. Double-click `Setup Karaoke Tracks.bat` (once per PC).
-2. Drag a folder of songs onto `Make Karaoke Tracks.bat`.
-3. Open the new `Karaoke` folder when the window says Finished.
+1. Double-click `Setup Karaoke Tracks` (once per PC).
+2. Windows: drag a folder of songs onto `Make Karaoke Tracks.bat`.
+   macOS: double-click `Make Karaoke Tracks.command` and drag the folder into
+   the Terminal window it opens.
+3. Open the new `Karaoke` folder when it says Finished.
 
-Setup asks one question if it finds an NVIDIA GPU: whether to install the
-CUDA build of PyTorch (2-3 GB, roughly 5-10x faster than the CPU). Without a
-GPU, expect 10-25 minutes per song; with one, a minute or two.
+Setup asks one question if it finds a suitable GPU: whether to install the
+accelerated build of PyTorch (2-3 GB, roughly 5-10x faster than the CPU).
+Without one, expect several minutes per song; with one, a minute or two.
 
-Requirements: Windows 10/11 (64-bit), internet for the first run, about 6 GB
-of free disk space.
+Requirements: Windows 10/11 (64-bit) or macOS 11+, internet for the first
+run, about 6 GB of free disk space.
 
 ## Options
 
 ```bat
-"Make Karaoke Tracks.bat" "D:\Music\Album A"          :: process a folder
-"Make Karaoke Tracks.bat" "D:\Music\Album A" -DryRun   :: show what would happen
+:: Windows
+"Make Karaoke Tracks.bat" "D:\Music\Album A"           :: process a folder
+"Make Karaoke Tracks.bat" "D:\Music\Album A" -DryRun    :: show what would happen
 "Make Karaoke Tracks.bat" "D:\Music\Album A" -Device cuda
 ```
 
-Also: `-OutputPath`, `-Reconvert`.
+```bash
+# macOS
+./"Make Karaoke Tracks.command" -i ~/Music/Album -n     # dry run
+./"Make Karaoke Tracks.command" -i ~/Music/Album -d mps # Apple Silicon GPU
+```
+
+Also: `-OutputPath` / `-o`, `-Reconvert` / `-r`.
+
 
 ## Design notes
 
@@ -57,12 +79,22 @@ Also: `-OutputPath`, `-Reconvert`.
   `htdemucs_ft` and the other Demucs models.
 - Filtering is done on the file extension, because `Get-ChildItem -Include`
   is silently ignored when combined with `-LiteralPath`.
+- **macOS keeps bash 3.2 compatibility** (the version Apple ships): no
+  associative arrays, so duplicate detection uses a newline-separated string
+  plus a quoted `case` pattern - which also means song names containing
+  `[ ] * ?` are matched literally.
+- **The macOS scripts skip `/usr/bin/python3` unless the Command Line Tools
+  are installed**, because that stub pops a GUI installer dialog when run.
 
 ## Requirements
 
 Python 3.9+, `demucs`, `ffmpeg`. Setup installs all of these into a private
 `venv` folder, so nothing else on the machine is affected. `venv/` and
 `tools/` are ignored by git - they are rebuilt per machine.
+
+On macOS, Setup prefers Homebrew for ffmpeg and falls back to a
+self-contained `imageio-ffmpeg` binary inside the venv, so no administrator
+password or Homebrew is strictly required.
 
 ## Licence
 

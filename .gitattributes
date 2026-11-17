@@ -7,3 +7,9 @@
 *.txt   text eol=crlf
 *.md    text eol=crlf
 .gitignore  text eol=lf
+
+# macOS scripts are bash: LF only, and they must stay executable. These
+# patterns come last so they win over the generic rules above.
+macos/*.command text eol=lf
+macos/*.txt     text eol=lf
+macos/*.md      text eol=lf
